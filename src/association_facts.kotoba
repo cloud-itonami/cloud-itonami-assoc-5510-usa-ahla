@@ -1,0 +1,62 @@
+(ns association-facts
+  (:export [main association-covered? entry-count entry-field topic-count
+            topic by-topic-count by-topic-id coverage-note]))
+(defn association-covered? [association :string] :i64 (string=? association "ahla"))
+(defn entry-count [association :string] :i64 (if (association-covered? association) 2 0))
+(defn valid-entry? [association :string index :i64] :i64
+  (if (association-covered? association) (if (= index 0) 1 (if (= index 1) 1 0)) 0))
+(defn entry-field [association :string index :i64 field :string] [:option :string]
+  (if (valid-entry? association index)
+    (if (= index 0)
+      (cond
+        (string=? field "id") (option-some-of [:option :string] "ahla.5-star-promise")
+        (string=? field "title") (option-some-of [:option :string] "5-Star Promise: Individual AHLA Member Commitments to Advance Safety and Security")
+        (string=? field "association") (option-some-of [:option :string] "ahla")
+        (string=? field "isic") (option-some-of [:option :string] "5510")
+        (string=? field "country") (option-some-of [:option :string] "USA")
+        (string=? field "kind") (option-some-of [:option :string] "self-regulatory-code")
+        (string=? field "url") (option-some-of [:option :string] "https://www.ahla.com/sites/default/files/five_star_promise_commitments_10-7-19_0.pdf")
+        (string=? field "url-provenance") (option-some-of [:option :string] "official-association-site")
+        (string=? field "established-date") (option-some-of [:option :string] "2018-09-06")
+        (string=? field "last-revised-date") (option-some-of [:option :string] "2019-10-04")
+        (string=? field "retrieved-at") (option-some-of [:option :string] "2026-07-15")
+        :else (option-none-of [:option :string]))
+      (cond
+        (string=? field "id") (option-some-of [:option :string] "ahla.about-profile")
+        (string=? field "title") (option-some-of [:option :string] "About AHLA (organization profile)")
+        (string=? field "association") (option-some-of [:option :string] "ahla")
+        (string=? field "isic") (option-some-of [:option :string] "5510")
+        (string=? field "country") (option-some-of [:option :string] "USA")
+        (string=? field "kind") (option-some-of [:option :string] "governance-program")
+        (string=? field "url") (option-some-of [:option :string] "https://www.ahla.com/about")
+        (string=? field "url-provenance") (option-some-of [:option :string] "official-association-site")
+        (string=? field "established-date") (option-some-of [:option :string] "1910")
+        (string=? field "retrieved-at") (option-some-of [:option :string] "2026-07-15")
+        :else (option-none-of [:option :string])))
+    (option-none-of [:option :string])))
+(defn topic-count [association :string index :i64] :i64
+  (if (valid-entry? association index) (if (= index 0) 2 1) 0))
+(defn topic [association :string index :i64 topic-index :i64] [:option :string]
+  (if (valid-entry? association index)
+    (if (= index 0)
+      (if (= topic-index 0) (option-some-of [:option :string] "worker-safety")
+          (if (= topic-index 1) (option-some-of [:option :string] "sexual-harassment-prevention") (option-none-of [:option :string])))
+      (if (= topic-index 0) (option-some-of [:option :string] "governance") (option-none-of [:option :string])))
+    (option-none-of [:option :string])))
+(defn by-topic-count [association :string candidate :string] :i64
+  (if (association-covered? association)
+    (if (string=? candidate "worker-safety") 1
+        (if (string=? candidate "sexual-harassment-prevention") 1 (if (string=? candidate "governance") 1 0))) 0))
+(defn by-topic-id [association :string candidate :string index :i64] [:option :string]
+  (if (association-covered? association)
+    (if (= index 0)
+      (if (string=? candidate "worker-safety") (entry-field association 0 "id")
+          (if (string=? candidate "sexual-harassment-prevention") (entry-field association 0 "id")
+              (if (string=? candidate "governance") (entry-field association 1 "id") (option-none-of [:option :string]))))
+      (option-none-of [:option :string]))
+    (option-none-of [:option :string])))
+(defn coverage-note [association :string] [:option :string]
+  (if (association-covered? association)
+    (option-some-of [:option :string] "cloud-itonami-assoc-5510-usa-ahla Wave 0 (ADR-2607141700): 2 ahla entries seeded with official ahla.com citations. Extend the sovereign catalog; never fabricate a rule id/url.")
+    (option-none-of [:option :string])))
+(defn main [] :i64 0)
